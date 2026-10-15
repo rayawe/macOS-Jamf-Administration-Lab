@@ -1,0 +1,13 @@
+# Running the script to troubleshoot
+#login Macbook, run terminal 
+
+chmod +x restart-print-service.sh
+sudo ./restart-print-service.sh
+
+
+#Another way to run the script to Self Service
+#Jamf Pro → Scripts - Upload Bash script
+#Jamf Pro → Policies - Create policy + add script
+#Scope → Assign to authorized test Mac
+#Self Service -> Make policy available to run
+#MacBook --> Run and verify printer service
