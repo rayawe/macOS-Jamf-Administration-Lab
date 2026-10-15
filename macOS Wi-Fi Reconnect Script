@@ -1,0 +1,64 @@
+
+#!/bin/bash
+
+# macOS Wi-Fi Reconnect Script
+# Author: Raya Obaidi
+# Purpose: Troubleshoot Wi-Fi connectivity
+
+SSID="Your-WiFi-SSID"
+
+# Check macOS
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "Error: macOS only."
+    exit 1
+fi
+
+# Detect Wi-Fi interface
+WIFI_DEVICE=$(
+    networksetup -listallhardwareports |
+    awk '/Hardware Port: (Wi-Fi|AirPort)/ {
+        getline
+        print $2
+        exit
+    }'
+)
+
+if [[ -z "$WIFI_DEVICE" ]]; then
+    echo "Wi-Fi interface not found."
+    exit 1
+fi
+
+echo "Wi-Fi device: $WIFI_DEVICE"
+
+# Show current connection
+networksetup -getairportnetwork "$WIFI_DEVICE"
+
+# Disconnect Wi-Fi
+echo "Disconnecting Wi-Fi..."
+networksetup -setairportpower "$WIFI_DEVICE" off || exit 1
+
+sleep 3
+
+# Enable Wi-Fi
+echo "Enabling Wi-Fi..."
+networksetup -setairportpower "$WIFI_DEVICE" on || exit 1
+
+sleep 5
+
+# Reconnect to network
+echo "Connecting to $SSID..."
+
+if ! networksetup -setairportnetwork "$WIFI_DEVICE" "$SSID"; then
+    echo "Connection attempt failed."
+    exit 1
+fi
+
+# Verify Wi-Fi
+echo "Checking connection..."
+networksetup -getairportnetwork "$WIFI_DEVICE"
+
+# Check IP address
+echo "Checking IP address..."
+ipconfig getifaddr "$WIFI_DEVICE" || true
+
+echo "Wi-Fi troubleshooting finished."
